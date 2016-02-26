@@ -26,7 +26,7 @@ use webtoucher\commands\Controller;
 class AmqpListenerController extends AmqpConsoleController
 {
     /**
-     * Interpreter classes f AMQP messages. This class will be used if interpreter class not set for exchange.
+     * Interpreter classes for AMQP messages. This class will be used if interpreter class not set for exchange.
      *
      * @var array
      */
@@ -59,7 +59,9 @@ class AmqpListenerController extends AmqpConsoleController
                 'routing_key' => $msg->get('routing_key'),
                 'reply_to' => $msg->has('reply_to') ? $msg->get('reply_to') : null,
             ];
-            $interpreter->$method(Json::decode($msg->body, true), $info);
+            if($interpreter->$method(Json::decode($msg->body, true), $info) === true) {
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+            }
         } else {
             if (!isset($this->interpreters[$this->exchange])) {
                 $interpreter = new AmqpInterpreter();
