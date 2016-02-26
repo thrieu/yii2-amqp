@@ -26,7 +26,7 @@ use webtoucher\commands\Controller;
 class AmqpListenerController extends AmqpConsoleController
 {
     /**
-     * Interpreter classes for AMQP messages. This class will be used if interpreter class not set for exchange.
+     * Interpreter classes f AMQP messages. This class will be used if interpreter class not set for exchange.
      *
      * @var array
      */
