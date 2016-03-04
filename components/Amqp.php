@@ -152,7 +152,7 @@ class Amqp extends Component
             $response = $answer->body;
         };
 
-        $this->channel->basic_consume($queueName, '', false, false, false, false, $callback);
+        $this->channel->basic_consume($queueName, '', false, true, false, false, $callback);
         $this->channel->basic_publish($message, $exchange, $routing_key);
         while (!$response) {
             // exception will be thrown on timeout
@@ -169,14 +169,14 @@ class Amqp extends Component
      * @param callable $callback
      * @param string $type
      */
-    public function listen($exchange, $routing_key, $callback, $type = self::TYPE_TOPIC)
+    public function listen($exchange, $routing_key, $queueName, $callback, $type = self::TYPE_TOPIC)
     {
-        list ($queueName) = $this->channel->queue_declare();
+        list ($queueName) = $queueName == '' ? $this->channel->queue_declare() : $this->channel->queue_declare($queueName, false, true, false, false);
         if ($type == Amqp::TYPE_DIRECT) {
             $this->channel->exchange_declare($exchange, $type, false, true, false);
         }
         $this->channel->queue_bind($queueName, $exchange, $routing_key);
-        $this->channel->basic_consume($queueName, '', false, false, false, false, $callback);
+        $this->channel->basic_consume($queueName, '', false, true, false, false, $callback);
 
         while (count($this->channel->callbacks)) {
             $this->channel->wait();
